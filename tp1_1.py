@@ -13,8 +13,11 @@ class Pedido:
     def es_circular(self):
         return self.inicio > self.final
 
+
     def se_superpone_con(self, otro_pedido):
-        pass #Falta implementar
+        if self.fin < otro_pedido.inicio or self.inicio > otro_pedido.fin: return False
+        return True
+
 
 
 #El archivo lo asumimos con formato CSV, cada linea es "nombre,fecha_inicio,fecha_fin"
@@ -29,9 +32,10 @@ def procesar_archivo(ruta_archivo):
     return pedidos
 
 
+#Asumimos que viene ordenado, es O(n)
 def interval_scheduling(pedidos):
     if len(pedidos) <= 0: return None
-    pedidos = sorted(pedidos, key = lambda pedido: pedido.fin)
+    #pedidos = sorted(pedidos, key = lambda pedido: pedido.fin)
     s = []
     s.append(pedidos[0])
     ultima_finalizacion = pedidos[0].fin
@@ -41,9 +45,9 @@ def interval_scheduling(pedidos):
             ultima_finalizacion = pedidios[i].fin
     return s
 
+#O(n)
 def armado_desde_pedido(pedidos, un_pedido):
     if len(pedidos) <= 0: return None
-    
     nuevo_pedidos = []
     #Elimino los pedidos que se superponen a un_pedido
     for i in range(len(pedidos)):
@@ -63,26 +67,41 @@ def arreglo_mas_largo(arreglos):
     return arreglos[i]
 
 
+#pedidos ya esta ordenado, entonces es O(n)
+def interval_scheduling_sin_entre_semana(pedidos):
+    nuevo_pedidos = []
+    for p in pedidos:
+        if not p.es_circular(): nuevo_pedidos.append(p)
+    return interval_scheduling(pedidos)
 
+# O(n^2) + O(nlog(n)) = O(n^2)
 def interval_scheduling_circular(pedidos):
     if len(pedidos) <= 0: return None
 
-    #O(n.log(n))
-    pedidos_totales = sorted(pedidos, key = lambda pedido: pedido.fin)
+    #sorted es O(n.log(n))
+    pedidos_ordenado = sorted(pedidos, key = lambda pedido: pedido.fin)
     
-    compentencia_pedidos = []
+    pedidos_entre_semana = []
+    #O(n)
+    for p in pedidos:
+        if p.es_circular():
+            pedidos_entre_semana.append(p) 
     
-    #Todo esto es O(n ^ 2), se repite n veces una operacion O(n)
-    for i in range(len(pedidos_totales)): #Me armo un arreglo con tantas posiciones como pedidos, en cada uno guardo otro arreglo
-        compentencia_pedidos.append(armado_desde_pedido(pedidos, pedidos_totales[i])) #O(n)
+    solucion_actual = interval_scheduling_sin_entre_semana(pedidos_ordenado) #O(n)
+    #Hace n iteraciones en el peor caso. Adentro hace operaciones O(n), entonces en total es O(n^2)
+    for p in pedidos_entre_semana:
+        s = armado_desde_pedido(pedidos_totales, p) #O(n)
+        if len(s) > len(solucion_actual):
+            solucion_actual = s
 
-    #Elijo el arreglo mas largo, lo devuelvo en O(n)
-    return arreglo_mas_largo(compentencia_pedidos)
+    return solucion_actual
 
 
 pedidos = procesar_archivo("prueba_entrada.csv")
 
 for p in pedidos:
     print("Nombre: " + p.nombre + ", Inicio: " + str(p.inicio) + ", Fin: " + str(p.fin))
+
+
 
 
