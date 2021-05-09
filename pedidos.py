@@ -13,7 +13,12 @@ class Pedido:
 
     def se_superpone_con(self, otro_pedido):
         if self.es_circular():
-            return self.fin < otro_pedido.inicio and self.inicio > otro_pedido.fin
+            if otro_pedido.es_circular():
+                return True
+            elif self.fin <= otro_pedido.inicio and self.inicio >= otro_pedido.fin:
+                return False
+            else:
+                return True
         elif otro_pedido.es_circular():
             return otro_pedido.se_superpone_con(self)
         elif self.fin < otro_pedido.inicio or self.inicio > otro_pedido.fin: return False

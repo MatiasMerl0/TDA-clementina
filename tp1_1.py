@@ -17,7 +17,7 @@ def procesar_archivo(ruta_archivo):
 
 # Asumimos que viene ordenado por fecha de finalizacion. Esto es O(n)
 def interval_scheduling(pedidos):
-    if len(pedidos) <= 0: return None
+    if len(pedidos) <= 0: return []
     solucion = [pedidos[0]]
     ultima_finalizacion = pedidos[0].fin
     for i in range(1, len(pedidos)):
